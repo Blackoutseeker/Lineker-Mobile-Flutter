@@ -31,6 +31,12 @@
 .pub/
 /build/
 
+# Store files
+*.g.dart
+
+# Thumbs
+Thumbs.db
+
 # Web related
 lib/generated_plugin_registrant.dart
 
