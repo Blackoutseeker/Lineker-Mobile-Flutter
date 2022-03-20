@@ -18,6 +18,7 @@ import './views/screens/login_screen.dart';
 import './views/screens/main_screen.dart';
 import './views/screens/filters_screen.dart';
 import './views/screens/scan_screen.dart';
+import './views/screens/history_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +56,7 @@ class App extends StatelessWidget {
           AppRoutes.main: (_) => const MainScreen(),
           AppRoutes.filters: (_) => const FiltersScreen(),
           AppRoutes.scan: (_) => const ScanScreen(),
+          AppRoutes.history: (_) => const HistoryScreen(),
         },
       ),
     );
