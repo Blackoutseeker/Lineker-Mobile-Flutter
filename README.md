@@ -7,7 +7,7 @@
 </p>
 
 ![version](https://img.shields.io/badge/Version-2.1.3-005884)
-![flutter](https://img.shields.io/badge/Flutter-2.8.1-1389FD)
+![flutter](https://img.shields.io/badge/Flutter-2.10.2-1389FD)
 
 <a style="outline: none;" href='https://play.google.com/store/apps/details?id=com.FelipsTudio.lineker&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
 
@@ -51,4 +51,4 @@
 
 <img src="https://user-images.githubusercontent.com/56811005/103469908-d5367780-4d49-11eb-8c56-db348eff1989.png" width="400" >
 
-> © 2021 Felip's Tudio. All rights reserved
+> © 2022 Felip's Tudio. All rights reserved
