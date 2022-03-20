@@ -3,4 +3,5 @@ class AppRoutes {
   static const main = '/main';
   static const filters = '/filters';
   static const scan = '/scan';
+  static const history = '/history';
 }
