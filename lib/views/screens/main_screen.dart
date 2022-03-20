@@ -13,7 +13,6 @@ import '../../models/database/link_model.dart';
 
 import '../widgets/drawer_widget.dart';
 import '../widgets/title_widget.dart';
-import '../widgets/main/filter_button_widget.dart';
 import '../widgets/main/link_item_widget.dart';
 import '../widgets/main/add_modal_widget.dart';
 import '../widgets/main/void_link_widget.dart';
@@ -69,6 +68,10 @@ class _MainScreenState extends State<MainScreen> {
         });
       });
     }
+  }
+
+  void _navigateToFiltersScreen(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed(AppRoutes.filters);
   }
 
   void switchAppBar() {
@@ -153,6 +156,10 @@ class _MainScreenState extends State<MainScreen> {
       centerTitle: true,
       actions: <IconButton>[
         IconButton(
+          icon: const Icon(Icons.filter_alt),
+          onPressed: () => _navigateToFiltersScreen(context),
+        ),
+        IconButton(
           icon: const Icon(Icons.search),
           onPressed: switchAppBar,
         ),
@@ -200,9 +207,7 @@ class _MainScreenState extends State<MainScreen> {
           key: const Key('Links Scaffold'),
           drawer: DrawerWidget(key: const Key('Drawer')),
           floatingActionButton: Padding(
-            padding: const EdgeInsets.only(
-              left: 32,
-            ),
+            padding: const EdgeInsets.only(left: 32),
             child: _isSearching
                 ? null
                 : Row(
@@ -238,7 +243,6 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: Column(
             children: <Widget>[
-              const FilterButtonWidget(),
               Expanded(
                 child: _links.isNotEmpty
                     ? StreamBuilder(
@@ -250,7 +254,7 @@ class _MainScreenState extends State<MainScreen> {
                             .child(filterStore.filter)
                             .onValue,
                         builder: (_, snapshot) => ListView.builder(
-                          padding: const EdgeInsets.only(bottom: 80),
+                          padding: const EdgeInsets.only(top: 10, bottom: 80),
                           controller: _scrollController,
                           itemCount: _filteredLinks.length,
                           itemBuilder: (_, index) => LinkItemWidget(
