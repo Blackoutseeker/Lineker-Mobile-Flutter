@@ -7,12 +7,31 @@ import '../../controllers/stores/user_store.dart';
 import '../../controllers/stores/theme_store.dart';
 import '../../controllers/services/authentication.dart';
 
+import '../../models/routes/app_routes.dart';
+
 class DrawerWidget extends StatelessWidget {
   DrawerWidget({Key? key}) : super(key: key);
 
   final UserStore _userStore = GetIt.I.get<UserStore>();
   final ThemeStore _themeStore = GetIt.I.get<ThemeStore>();
   final Authentication _authentication = Authentication.instance;
+
+  void _navigateToHistoryScreen(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed(AppRoutes.history);
+  }
+
+  void _showAboutTheAppDialog(BuildContext context) {
+    showAboutDialog(
+      context: context,
+      applicationIcon: Image.asset(
+        'assets/images/Lineker Logo.png',
+        height: 50,
+      ),
+      applicationLegalese: '© 2021 Felip\'s Tudio',
+      applicationName: 'Lineker',
+      applicationVersion: 'v2.1.3',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +91,21 @@ class DrawerWidget extends StatelessWidget {
             child: Divider(),
           ),
           ListTile(
+            onTap: () => _navigateToHistoryScreen(context),
+            leading: const Icon(
+              Icons.history,
+              color: Color(0xFFFFFFFF),
+              size: 28,
+            ),
+            title: const Text(
+              'History',
+              style: TextStyle(
+                color: Color(0xFFFFFFFF),
+                fontSize: 18,
+              ),
+            ),
+          ),
+          ListTile(
             onTap: () async => await launch('https://lineker.vercel.app'),
             leading: const Icon(
               Icons.web,
@@ -87,18 +121,7 @@ class DrawerWidget extends StatelessWidget {
             ),
           ),
           ListTile(
-            onTap: () {
-              showAboutDialog(
-                context: context,
-                applicationIcon: Image.asset(
-                  'assets/images/Lineker Logo.png',
-                  height: 50,
-                ),
-                applicationLegalese: '© 2021 Felip\'s Tudio',
-                applicationName: 'Lineker',
-                applicationVersion: 'v2.1.3',
-              );
-            },
+            onTap: () => _showAboutTheAppDialog(context),
             leading: const Icon(
               Icons.info_outline,
               color: Color(0xFFFFFFFF),
