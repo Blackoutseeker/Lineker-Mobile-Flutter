@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
 
 import '../../../models/database/link_model.dart';
+import '../../../models/database/history_model.dart';
 
 class AddLinkModalWidget extends StatefulWidget {
   const AddLinkModalWidget({
@@ -39,14 +40,24 @@ class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
     if (widget.userUID != null && url.isNotEmpty) {
       final DatabaseReference database = FirebaseDatabase.instance.reference();
 
+      final DateTime currentDate = DateTime.now();
       final String datetime =
-          DateFormat('dd-MM-yyyy-HH:mm:ss').format(DateTime.now());
-      final String date = DateFormat('dd/MM/yyyy').format(DateTime.now());
+          DateFormat('dd-MM-yyyy-HH:mm:ss').format(currentDate);
+      final String date = DateFormat('dd/MM/yyyy').format(currentDate);
+      final String time = DateFormat('HH:mm:ss').format(currentDate);
 
       final LinkModel newLink = LinkModel(
         title: title.isNotEmpty ? title : 'Untitled',
         url: url,
         date: date,
+        datetime: datetime,
+      );
+
+      final HistoryModel newHistoryItem = HistoryModel(
+        title: title.isNotEmpty ? title : 'Untitled',
+        url: url,
+        date: date,
+        time: time,
         datetime: datetime,
       );
 
@@ -68,6 +79,19 @@ class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
         'url': newLink.url,
         'date': newLink.date,
         'datetime': newLink.datetime,
+      });
+
+      await database
+          .child('users')
+          .child(widget.userUID!)
+          .child('history')
+          .child(datetime)
+          .set({
+        'title': newHistoryItem.title,
+        'url': newHistoryItem.url,
+        'date': newHistoryItem.date,
+        'time': newHistoryItem.time,
+        'datetime': newHistoryItem.datetime,
       }).then((_) => Navigator.of(context).pop());
     }
   }
