@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../controllers/stores/user_store.dart';
 
+import '../../models/utils/constants.dart';
 import '../../models/database/history_model.dart';
 import '../../models/routes/app_routes.dart';
 
@@ -22,8 +24,19 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen> {
   final DatabaseReference _database = FirebaseDatabase.instance.reference();
   late StreamSubscription<Event> _dataStreamSubscription;
-  List<HistoryModel> _historyItems = [];
   final UserStore _userStore = GetIt.I.get<UserStore>();
+
+  final BannerAd _bannerAd = BannerAd(
+    adUnitId: Constants.instance.bannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: BannerAdListener(
+        onAdFailedToLoad: (Ad ad, LoadAdError loadAdError) async {
+      await ad.dispose();
+    }),
+  );
+
+  List<HistoryModel> _historyItems = [];
 
   void _navigateToMainScreen(BuildContext context) {
     Navigator.of(context).pushReplacementNamed(AppRoutes.main);
@@ -144,12 +157,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     super.initState();
     _activeListeners();
+    _bannerAd.load();
   }
 
   @override
   void deactivate() {
     _dataStreamSubscription.cancel();
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
   }
 
   @override
@@ -184,32 +204,43 @@ class _HistoryScreenState extends State<HistoryScreen> {
             ),
           ],
         ),
-        body: _historyItems.isNotEmpty
-            ? StreamBuilder(
-                key: const Key('History Stream Builder'),
-                stream: _database
-                    .child('users')
-                    .child(_userStore.user.id!)
-                    .child('history')
-                    .onValue,
-                builder: (_, snapshot) => ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  itemCount: _historyItems.length,
-                  itemBuilder: (_, index) => HistoryItemWidget(
-                    key: UniqueKey(),
-                    historyItem: _historyItems[index],
-                    deleteHistoryItem: () async {
-                      await _showDeleteAlertDialog(
-                        context,
-                        () async =>
-                            await _deleteHistoryItem(_historyItems[index]),
-                        null,
-                      );
-                    },
-                  ),
-                ),
-              )
-            : const VoidHistory(),
+        body: Column(
+          children: [
+            SizedBox(
+              child: AdWidget(ad: _bannerAd),
+              width: _bannerAd.size.width.toDouble(),
+              height: _bannerAd.size.height.toDouble() + 5,
+            ),
+            Expanded(
+              child: _historyItems.isNotEmpty
+                  ? StreamBuilder(
+                      key: const Key('History Stream Builder'),
+                      stream: _database
+                          .child('users')
+                          .child(_userStore.user.id!)
+                          .child('history')
+                          .onValue,
+                      builder: (_, snapshot) => ListView.builder(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        itemCount: _historyItems.length,
+                        itemBuilder: (_, index) => HistoryItemWidget(
+                          key: UniqueKey(),
+                          historyItem: _historyItems[index],
+                          deleteHistoryItem: () async {
+                            await _showDeleteAlertDialog(
+                              context,
+                              () async => await _deleteHistoryItem(
+                                  _historyItems[index]),
+                              null,
+                            );
+                          },
+                        ),
+                      ),
+                    )
+                  : const VoidHistory(),
+            ),
+          ],
+        ),
       ),
     );
   }

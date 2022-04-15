@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import './controllers/stores/theme_store.dart';
 import './controllers/stores/user_store.dart';
@@ -25,6 +26,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   await Firebase.initializeApp();
+  await MobileAds.instance.initialize();
 
   final GetIt getIt = GetIt.I;
   getIt.registerLazySingleton<UserStore>(() => UserStore());

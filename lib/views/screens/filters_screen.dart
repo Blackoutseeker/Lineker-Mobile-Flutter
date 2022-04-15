@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../controllers/stores/filter_store.dart';
 import '../../controllers/stores/user_store.dart';
 
+import '../../models/utils/constants.dart';
 import '../../models/database/filter_model.dart';
 import '../../models/routes/app_routes.dart';
 import '../../models/utils/database_codification.dart';
@@ -23,9 +25,20 @@ class FiltersScreen extends StatefulWidget {
 class _FiltersScreenState extends State<FiltersScreen> {
   final DatabaseReference _database = FirebaseDatabase.instance.reference();
   late StreamSubscription<Event> _dataStreamSubscription;
-  List<FilterModel> _filters = [];
   final UserStore _userStore = GetIt.I.get<UserStore>();
   final FilterStore _filterStore = GetIt.I.get<FilterStore>();
+
+  final BannerAd _bannerAd = BannerAd(
+    adUnitId: Constants.instance.bannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: BannerAdListener(
+        onAdFailedToLoad: (Ad ad, LoadAdError loadAdError) async {
+      await ad.dispose();
+    }),
+  );
+
+  List<FilterModel> _filters = [];
 
   void _clearFiltersState() {
     setState(() {
@@ -97,12 +110,19 @@ class _FiltersScreenState extends State<FiltersScreen> {
   void initState() {
     super.initState();
     _activeListeners();
+    _bannerAd.load();
   }
 
   @override
   void deactivate() {
     _dataStreamSubscription.cancel();
     super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
   }
 
   @override
@@ -139,63 +159,76 @@ class _FiltersScreenState extends State<FiltersScreen> {
               onPressed: () => _navigateToMainScreen(context),
             ),
           ),
-          body: StreamBuilder(
-            key: const Key('Filters Stream Builder'),
-            stream: _database
-                .child('users')
-                .child(_userStore.user.id!)
-                .child('filters')
-                .onValue,
-            builder: (_, snapshot) => ListView.builder(
-              padding: const EdgeInsets.only(bottom: 80),
-              itemCount: _filters.length,
-              itemBuilder: (_, index) => ListTile(
-                key: UniqueKey(),
-                onTap: () => _changeCurrentFilter(_filters[index].filter),
-                title: Text(
-                  DatabaseCodification()
-                      .decodeFromDatabase(text: _filters[index].filter),
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 20,
-                    overflow: TextOverflow.ellipsis,
-                    fontWeight: FontWeight.bold,
+          body: Column(
+            children: [
+              SizedBox(
+                child: AdWidget(ad: _bannerAd),
+                width: _bannerAd.size.width.toDouble(),
+                height: _bannerAd.size.height.toDouble() + 10,
+              ),
+              Expanded(
+                child: StreamBuilder(
+                  key: const Key('Filters Stream Builder'),
+                  stream: _database
+                      .child('users')
+                      .child(_userStore.user.id!)
+                      .child('filters')
+                      .onValue,
+                  builder: (_, snapshot) => ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 80),
+                    itemCount: _filters.length,
+                    itemBuilder: (_, index) => ListTile(
+                      key: UniqueKey(),
+                      onTap: () => _changeCurrentFilter(_filters[index].filter),
+                      title: Text(
+                        DatabaseCodification()
+                            .decodeFromDatabase(text: _filters[index].filter),
+                        style: const TextStyle(
+                          color: Color(0xFFFFFFFF),
+                          fontSize: 20,
+                          overflow: TextOverflow.ellipsis,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      selected: _filters[index].filter == _filterStore.filter,
+                      selectedTileColor:
+                          const Color.fromRGBO(255, 255, 255, 0.15),
+                      trailing: _filters[index].filter != 'Default'
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.delete,
+                                color: Color(0xFFFFFFFF),
+                              ),
+                              onPressed: () => showDialog(
+                                barrierDismissible: true,
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  title: const Text('Are you sure?'),
+                                  content: const Text(
+                                    'All your links within this filter will be deleted!',
+                                  ),
+                                  actions: <TextButton>[
+                                    TextButton(
+                                      child: const Text('Yes'),
+                                      onPressed: () => _deleteFilter(
+                                          _filters[index].filter,
+                                          dialogContext),
+                                    ),
+                                    TextButton(
+                                      child: const Text('No'),
+                                      onPressed: () =>
+                                          Navigator.of(dialogContext).pop(),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          : null,
+                    ),
                   ),
                 ),
-                selected: _filters[index].filter == _filterStore.filter,
-                selectedTileColor: const Color.fromRGBO(255, 255, 255, 0.15),
-                trailing: _filters[index].filter != 'Default'
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Color(0xFFFFFFFF),
-                        ),
-                        onPressed: () => showDialog(
-                          barrierDismissible: true,
-                          context: context,
-                          builder: (dialogContext) => AlertDialog(
-                            title: const Text('Are you sure?'),
-                            content: const Text(
-                              'All your links within this filter will be deleted!',
-                            ),
-                            actions: <TextButton>[
-                              TextButton(
-                                child: const Text('Yes'),
-                                onPressed: () => _deleteFilter(
-                                    _filters[index].filter, dialogContext),
-                              ),
-                              TextButton(
-                                child: const Text('No'),
-                                onPressed: () =>
-                                    Navigator.of(dialogContext).pop(),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : null,
               ),
-            ),
+            ],
           ),
         ),
       ),

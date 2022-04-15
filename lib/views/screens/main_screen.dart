@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../controllers/services/load.dart';
 import '../../controllers/stores/user_store.dart';
 import '../../controllers/stores/filter_store.dart';
 
+import '../../models/utils/constants.dart';
 import '../../models/routes/app_routes.dart';
 import '../../models/database/link_model.dart';
 
@@ -27,15 +29,26 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final DatabaseReference _database = FirebaseDatabase.instance.reference();
   late StreamSubscription<Event> _dataStreamSubscription;
-  List<LinkModel> _links = [];
-  List<LinkModel> _filteredLinks = [];
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchInputController = TextEditingController();
   final FocusNode _searchInputFocusNode = FocusNode();
-  bool _isSearching = false;
+
+  final BannerAd _bannerAd = BannerAd(
+    adUnitId: Constants.instance.bannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: BannerAdListener(
+        onAdFailedToLoad: (Ad ad, LoadAdError loadAdError) async {
+      await ad.dispose();
+    }),
+  );
 
   final UserStore userStore = GetIt.I.get<UserStore>();
   final FilterStore filterStore = GetIt.I.get<FilterStore>();
+
+  List<LinkModel> _links = [];
+  List<LinkModel> _filteredLinks = [];
+  bool _isSearching = false;
 
   void _clearLinksState() {
     setState(() {
@@ -183,6 +196,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _loadData(_activateListeners);
+    _bannerAd.load();
   }
 
   @override
@@ -195,6 +209,7 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     _searchInputController.dispose();
     _scrollController.dispose();
+    _bannerAd.dispose();
     super.dispose();
   }
 
@@ -243,6 +258,13 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: Column(
             children: <Widget>[
+              _isSearching
+                  ? const SizedBox()
+                  : SizedBox(
+                      child: AdWidget(ad: _bannerAd),
+                      width: _bannerAd.size.width.toDouble(),
+                      height: _bannerAd.size.height.toDouble() + 5,
+                    ),
               Expanded(
                 child: _links.isNotEmpty
                     ? StreamBuilder(
@@ -254,7 +276,7 @@ class _MainScreenState extends State<MainScreen> {
                             .child(filterStore.filter)
                             .onValue,
                         builder: (_, snapshot) => ListView.builder(
-                          padding: const EdgeInsets.only(top: 10, bottom: 80),
+                          padding: const EdgeInsets.only(top: 5, bottom: 80),
                           controller: _scrollController,
                           itemCount: _filteredLinks.length,
                           itemBuilder: (_, index) => LinkItemWidget(

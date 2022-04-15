@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+import '../../models/utils/constants.dart';
 
 import '../widgets/scan/qr_modal_widget.dart';
 
@@ -13,6 +16,17 @@ class ScanScreen extends StatefulWidget {
 
 class _ScanScreenState extends State<ScanScreen> {
   final GlobalKey qrViewKey = GlobalKey();
+
+  final BannerAd _bannerAd = BannerAd(
+    adUnitId: Constants.instance.bannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: BannerAdListener(
+        onAdFailedToLoad: (Ad ad, LoadAdError loadAdError) async {
+      await ad.dispose();
+    }),
+  );
+
   QRViewController? qrViewController;
   PermissionStatus cameraPermissionStatus = PermissionStatus.denied;
 
@@ -54,6 +68,7 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void initState() {
     super.initState();
+    _bannerAd.load();
 
     final bool notHaveCameraPermission =
         cameraPermissionStatus != PermissionStatus.granted;
@@ -65,6 +80,7 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   void dispose() {
     qrViewController?.dispose();
+    _bannerAd.dispose();
     super.dispose();
   }
 
@@ -82,6 +98,14 @@ class _ScanScreenState extends State<ScanScreen> {
               overlay: QrScannerOverlayShape(
                 borderColor: const Color(0xFFFFFFFF),
               ),
+            ),
+            Positioned(
+              child: SizedBox(
+                child: AdWidget(ad: _bannerAd),
+                width: _bannerAd.size.width.toDouble(),
+                height: _bannerAd.size.height.toDouble(),
+              ),
+              top: 10,
             ),
           ],
         ),
