@@ -29,7 +29,7 @@ class DrawerWidget extends StatelessWidget {
       ),
       applicationLegalese: '© 2021 Felip\'s Tudio',
       applicationName: 'Lineker',
-      applicationVersion: 'v2.2.3',
+      applicationVersion: 'v2.3.3',
     );
   }
 
