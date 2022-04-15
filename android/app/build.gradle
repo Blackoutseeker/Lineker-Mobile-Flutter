@@ -6,6 +6,8 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def adMobId = localProperties.getProperty('adMobId')
+
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
@@ -64,6 +66,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
+        manifestPlaceholders = [adMobId: adMobId]
     }
 
     buildTypes {
