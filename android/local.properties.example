@@ -1,0 +1,7 @@
+# The actual file name is "local.properties"
+
+sdk.dir=<Android SDK path>
+flutter.sdk=<Flutter SDK path>
+flutter.buildMode=<Flutter build mode>
+flutter.versionName=<App version>
+adMobId=<AdMob PUB ID>

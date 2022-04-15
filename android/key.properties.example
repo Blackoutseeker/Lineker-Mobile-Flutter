@@ -1,0 +1,6 @@
+# The actual file name is "key.properties"
+
+storePassword=<Store password>
+keyPassword=<Key password>
+keyAlias=<Key alias>
+storeFile=<Keystore path>
