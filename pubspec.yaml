@@ -48,3 +48,4 @@ flutter:
   assets:
     - assets/images/Lineker Logo.png
     - assets/images/Drawer.png
+    - .env
