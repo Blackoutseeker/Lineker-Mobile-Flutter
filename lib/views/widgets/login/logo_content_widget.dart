@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 import '../../../views/widgets/title_widget.dart';
 
 class LogoContentWidget extends StatelessWidget {
-  const LogoContentWidget({Key? key}) : super(key: key);
+  LogoContentWidget({Key? key}) : super(key: key);
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +28,12 @@ class LogoContentWidget extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 22),
-        const SizedBox(
+        SizedBox(
           width: 250,
           child: Text(
-            'Access links between your devices',
+            _localization.translation.slogan,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               color: Color(0xFFFFFFFF),
             ),

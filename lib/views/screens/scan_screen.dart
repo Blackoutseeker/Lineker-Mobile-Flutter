@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+import '../../controllers/services/localization.dart';
+import '../../controllers/stores/localization_store.dart';
 
 import '../../models/utils/constants.dart';
 
@@ -11,11 +15,13 @@ class ScanScreen extends StatefulWidget {
   const ScanScreen({Key? key}) : super(key: key);
 
   @override
-  _ScanScreenState createState() => _ScanScreenState();
+  State<ScanScreen> createState() => _ScanScreenState();
 }
 
 class _ScanScreenState extends State<ScanScreen> {
   final GlobalKey qrViewKey = GlobalKey();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   final BannerAd _bannerAd = BannerAd(
     adUnitId: Constants.instance.bannerAdUnitId,
@@ -100,12 +106,12 @@ class _ScanScreenState extends State<ScanScreen> {
               ),
             ),
             Positioned(
+              top: 10,
               child: SizedBox(
-                child: AdWidget(ad: _bannerAd),
                 width: _bannerAd.size.width.toDouble(),
                 height: _bannerAd.size.height.toDouble(),
+                child: AdWidget(ad: _bannerAd),
               ),
-              top: 10,
             ),
           ],
         ),
@@ -119,8 +125,8 @@ class _ScanScreenState extends State<ScanScreen> {
               width: 210,
               height: 50,
               child: ElevatedButton(
-                child: const Text('Grant camera permission'),
                 onPressed: _requestCameraPermission,
+                child: Text(_localization.translation.cameraPermission),
               ),
             ),
           ),

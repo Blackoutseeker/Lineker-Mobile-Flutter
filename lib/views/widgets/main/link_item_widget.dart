@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:get_it/get_it.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+import '../../../controllers/services/localization.dart';
+
+import '../../../controllers/stores/localization_store.dart';
 
 import './qr_modal_widget.dart';
 
-class LinkItemWidget extends StatelessWidget {
+class LinkItemWidget extends StatefulWidget {
   const LinkItemWidget({
     required UniqueKey key,
     required this.title,
@@ -23,8 +28,16 @@ class LinkItemWidget extends StatelessWidget {
   final String datetime;
   final FocusNode searchInputFocusNode;
 
-  void _showQrModalWidget(BuildContext context, String url) {
-    final bool searchInputHasNoFocus = !searchInputFocusNode.hasFocus;
+  @override
+  State<LinkItemWidget> createState() => _LinkItemWidgetState();
+}
+
+class _LinkItemWidgetState extends State<LinkItemWidget> {
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
+
+  void _showQrModalWidget(String url) {
+    final bool searchInputHasNoFocus = !widget.searchInputFocusNode.hasFocus;
     if (searchInputHasNoFocus) {
       showModalBottomSheet(
         shape: const RoundedRectangleBorder(
@@ -40,60 +53,64 @@ class LinkItemWidget extends StatelessWidget {
     }
   }
 
-  Future<void> _launchUrl(BuildContext context) async {
-    final bool canLaunchUrl = await canLaunch(url);
+  Future<void> _launchUrl() async {
+    final bool canLaunchUrl = await canLaunchUrlString(widget.url);
     if (canLaunchUrl) {
-      await launch(url);
+      await launchUrlString(widget.url);
     } else {
-      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Can\'t open this URL!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_localization.translation.snackbar['launch_url']),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
-  Future<void> _copyUrlToClipboard(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: url)).then((_) {
+  Future<void> _copyUrlToClipboard() async {
+    await Clipboard.setData(ClipboardData(text: widget.url)).then((_) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('URL copied to the clipboard!'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(_localization.translation.snackbar['copy_url']),
+          duration: const Duration(seconds: 2),
         ),
       );
     });
   }
 
-  Future<void> _deleteLink(BuildContext context) async {
-    if (userUID != null) {
+  Future<void> _deleteLink(BuildContext dialogContex) async {
+    if (widget.userUID != null) {
       final DatabaseReference database = FirebaseDatabase.instance.reference();
       await database
           .child('users')
-          .child(userUID!)
+          .child(widget.userUID!)
           .child('links')
-          .child(currentFilter)
-          .child(datetime)
+          .child(widget.currentFilter)
+          .child(widget.datetime)
           .remove()
-          .then((_) => Navigator.of(context).pop());
+          .then((_) => Navigator.of(dialogContex).pop());
     }
   }
 
-  Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
+  Future<void> _showDeleteConfirmationDialog() async {
     await showDialog(
       context: context,
       barrierDismissible: true,
       builder: (dialogContex) => AlertDialog(
-        title: const Text('Are you sure?'),
+        title: Text(
+          _localization.translation.dialog['title'],
+        ),
         actions: <TextButton>[
           TextButton(
-            child: const Text('Yes'),
+            child: Text(_localization.translation.dialog['buttons']['yes']),
             onPressed: () => _deleteLink(dialogContex),
           ),
           TextButton(
-            child: const Text('No'),
+            child: Text(_localization.translation.dialog['buttons']['no']),
             onPressed: () => Navigator.of(dialogContex).pop(),
           ),
         ],
@@ -115,7 +132,7 @@ class LinkItemWidget extends StatelessWidget {
           child: Row(
             children: <Widget>[
               GestureDetector(
-                onTap: () => _showQrModalWidget(context, url),
+                onTap: () => _showQrModalWidget(widget.url),
                 child: const Icon(
                   Icons.qr_code_2,
                   color: Color(0xFFFFFFFF),
@@ -132,7 +149,7 @@ class LinkItemWidget extends StatelessWidget {
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Text(
-                            title,
+                            widget.title,
                             style: const TextStyle(
                               fontSize: 20,
                               color: Color(0xFFFFFFFF),
@@ -147,16 +164,16 @@ class LinkItemWidget extends StatelessWidget {
                           child: Row(
                             children: <Widget>[
                               Icon(
-                                url.contains('https')
+                                widget.url.contains('https')
                                     ? Icons.lock
                                     : Icons.warning,
                                 color: const Color(0xFFFFFFFF),
                               ),
                               const SizedBox(width: 5),
                               GestureDetector(
-                                onTap: () => _launchUrl(context),
+                                onTap: () => _launchUrl(),
                                 child: Text(
-                                  url,
+                                  widget.url,
                                   style: const TextStyle(
                                     color: Color(0xFFFFFFFF),
                                     fontSize: 18,
@@ -187,7 +204,7 @@ class LinkItemWidget extends StatelessWidget {
                             color: Color(0xFFFFFFFF),
                             size: 25,
                           ),
-                          onPressed: () => _copyUrlToClipboard(context),
+                          onPressed: () => _copyUrlToClipboard(),
                         ),
                       ),
                     ),
@@ -200,8 +217,7 @@ class LinkItemWidget extends StatelessWidget {
                             color: Color(0xFFFFFFFF),
                             size: 25,
                           ),
-                          onPressed: () =>
-                              _showDeleteConfirmationDialog(context),
+                          onPressed: () => _showDeleteConfirmationDialog(),
                         ),
                       ),
                     ),

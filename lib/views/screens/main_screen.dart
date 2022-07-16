@@ -6,8 +6,10 @@ import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../../controllers/services/load.dart';
+import '../../controllers/services/localization.dart';
 import '../../controllers/stores/user_store.dart';
 import '../../controllers/stores/filter_store.dart';
+import '../../controllers/stores/localization_store.dart';
 
 import '../../models/utils/constants.dart';
 import '../../models/routes/app_routes.dart';
@@ -23,7 +25,7 @@ class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
@@ -32,6 +34,8 @@ class _MainScreenState extends State<MainScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchInputController = TextEditingController();
   final FocusNode _searchInputFocusNode = FocusNode();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   final BannerAd _bannerAd = BannerAd(
     adUnitId: Constants.instance.bannerAdUnitId,
@@ -148,9 +152,9 @@ class _MainScreenState extends State<MainScreen> {
             color: Theme.of(context).appBarTheme.titleTextStyle?.color,
             fontSize: 18,
           ),
-          decoration: const InputDecoration(
-              hintText: 'Title, URL, date...',
-              hintStyle: TextStyle(
+          decoration: InputDecoration(
+              hintText: _localization.translation.placeholder['search'],
+              hintStyle: const TextStyle(
                 color: Color(0xFF9E9E9E),
               ),
               border: InputBorder.none),
@@ -188,8 +192,12 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> _loadData(VoidCallback callback) async {
     final Load load = Load.instance;
     await load.loadUser(context);
-    await load.loadFilter(context);
-    await load.loadTheme(context).then((_) => callback());
+    if (mounted) {
+      await load.loadFilter(context);
+      if (mounted) {
+        await load.loadTheme(context).then((_) => callback());
+      }
+    }
   }
 
   @override
@@ -220,7 +228,7 @@ class _MainScreenState extends State<MainScreen> {
       child: SafeArea(
         child: Scaffold(
           key: const Key('Links Scaffold'),
-          drawer: DrawerWidget(key: const Key('Drawer')),
+          drawer: const DrawerWidget(key: Key('Drawer')),
           floatingActionButton: Padding(
             padding: const EdgeInsets.only(left: 32),
             child: _isSearching
@@ -230,8 +238,8 @@ class _MainScreenState extends State<MainScreen> {
                     children: <FloatingActionButton>[
                       FloatingActionButton(
                         heroTag: 'Camera FAB',
-                        child: const Icon(Icons.camera_alt),
                         onPressed: _navigateToScanScreen,
+                        child: const Icon(Icons.camera_alt),
                       ),
                       FloatingActionButton(
                         heroTag: 'Add New Link FAB',
@@ -261,9 +269,9 @@ class _MainScreenState extends State<MainScreen> {
               _isSearching
                   ? const SizedBox()
                   : SizedBox(
-                      child: AdWidget(ad: _bannerAd),
                       width: _bannerAd.size.width.toDouble(),
                       height: _bannerAd.size.height.toDouble() + 5,
+                      child: AdWidget(ad: _bannerAd),
                     ),
               Expanded(
                 child: _links.isNotEmpty
@@ -290,7 +298,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         ),
                       )
-                    : const VoidLinkWidget(),
+                    : VoidLinkWidget(),
               ),
             ],
           ),

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 class VoidLinkWidget extends StatelessWidget {
-  const VoidLinkWidget({Key? key}) : super(key: key);
+  VoidLinkWidget({Key? key}) : super(key: key);
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   @override
   Widget build(BuildContext context) {
@@ -10,9 +17,9 @@ class VoidLinkWidget extends StatelessWidget {
       child: Column(
         children: <Widget>[
           const SizedBox(height: 40),
-          const Text(
-            'No link found!',
-            style: TextStyle(
+          Text(
+            _localization.translation.voidLink,
+            style: const TextStyle(
               color: Color(0xFFFFFFFF),
               fontSize: 20,
             ),
@@ -23,10 +30,10 @@ class VoidLinkWidget extends StatelessWidget {
             height: 100,
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Add a link to get started!',
+          Text(
+            _localization.translation.addLink,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFFFFFFFF),
               fontSize: 20,
             ),

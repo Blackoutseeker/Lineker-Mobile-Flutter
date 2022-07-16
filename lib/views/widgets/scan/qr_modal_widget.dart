@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
@@ -13,9 +12,12 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
+import '../../../controllers/services/localization.dart';
 import '../../../controllers/stores/user_store.dart';
 import '../../../controllers/stores/filter_store.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 import '../../../models/database/link_model.dart';
 
@@ -35,18 +37,24 @@ class QrModalWidget extends StatefulWidget {
 
 class _QrModalWidgetState extends State<QrModalWidget> {
   final ScreenshotController _screenshotController = ScreenshotController();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   Future<void> _closeQrModalWidget(BuildContext context) async {
     await widget.resumeCamera();
-    Navigator.of(context).pop();
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> _launchUrl(BuildContext context) async {
-    final bool canLaunchUrl = await canLaunch(widget.url);
+    final bool canLaunchUrl = await canLaunchUrlString(widget.url);
     if (canLaunchUrl) {
-      launch(widget.url);
+      launchUrlString(widget.url);
     } else {
-      _closeQrModalWidget(context);
+      if (mounted) {
+        _closeQrModalWidget(context);
+      }
     }
   }
 
@@ -94,9 +102,13 @@ class _QrModalWidgetState extends State<QrModalWidget> {
         quality: 100,
         name: captureTimestamp,
       );
-      _closeQrModalWidget(context);
+      if (mounted) {
+        _closeQrModalWidget(context);
+      }
     } else {
-      _closeQrModalWidget(context);
+      if (mounted) {
+        _closeQrModalWidget(context);
+      }
     }
   }
 
@@ -221,15 +233,15 @@ class _QrModalWidgetState extends State<QrModalWidget> {
                     TextButton(
                       onPressed: () => _launchUrl(context),
                       child: Row(
-                        children: const <Widget>[
-                          Icon(
+                        children: <Widget>[
+                          const Icon(
                             Icons.open_in_new,
                             color: Color(0xFF9E9E9E),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            'Open Link',
-                            style: TextStyle(
+                            _localization.translation.button['open_link'],
+                            style: const TextStyle(
                               color: Color(0xFF9E9E9E),
                             ),
                           ),
@@ -239,15 +251,15 @@ class _QrModalWidgetState extends State<QrModalWidget> {
                     TextButton(
                       onPressed: () => _saveQrCode(context),
                       child: Row(
-                        children: const <Widget>[
-                          Icon(
+                        children: <Widget>[
+                          const Icon(
                             Icons.photo_library,
                             color: Color(0xFF9E9E9E),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            'Save Link',
-                            style: TextStyle(
+                            _localization.translation.button['save_link'],
+                            style: const TextStyle(
                               color: Color(0xFF9E9E9E),
                             ),
                           ),
@@ -263,15 +275,15 @@ class _QrModalWidgetState extends State<QrModalWidget> {
                     TextButton(
                       onPressed: () => _copyUrlToClipboard(context),
                       child: Row(
-                        children: const <Widget>[
-                          Icon(
+                        children: <Widget>[
+                          const Icon(
                             Icons.copy,
                             color: Color(0xFF9E9E9E),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            'Copy Link',
-                            style: TextStyle(
+                            _localization.translation.button['copy_link'],
+                            style: const TextStyle(
                               color: Color(0xFF9E9E9E),
                             ),
                           ),
@@ -281,15 +293,15 @@ class _QrModalWidgetState extends State<QrModalWidget> {
                     TextButton(
                       onPressed: () => _addLinkIntoDatabase(context),
                       child: Row(
-                        children: const <Widget>[
-                          Icon(
+                        children: <Widget>[
+                          const Icon(
                             Icons.add,
                             color: Color(0xFF9E9E9E),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            'Add Link',
-                            style: TextStyle(
+                            _localization.translation.button['add_link'],
+                            style: const TextStyle(
                               color: Color(0xFF9E9E9E),
                             ),
                           ),

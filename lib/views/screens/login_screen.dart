@@ -15,9 +15,9 @@ class LoginScreen extends StatelessWidget {
           backgroundColor: const Color(0xFF005884),
           body: SingleChildScrollView(
             child: Column(
-              children: const <Widget>[
+              children: <Widget>[
                 LogoContentWidget(),
-                LoginFormWidget(),
+                const LoginFormWidget(),
               ],
             ),
           ),

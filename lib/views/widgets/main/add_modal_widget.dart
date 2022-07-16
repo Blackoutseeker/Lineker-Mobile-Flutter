@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 import '../../../models/database/link_model.dart';
 import '../../../models/database/history_model.dart';
@@ -17,12 +21,14 @@ class AddLinkModalWidget extends StatefulWidget {
   final String filter;
 
   @override
-  _AddLinkModalWidgetState createState() => _AddLinkModalWidgetState();
+  State<AddLinkModalWidget> createState() => _AddLinkModalWidgetState();
 }
 
 class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
   final TextEditingController _titleInputController = TextEditingController();
   final TextEditingController _urlInputController = TextEditingController();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   Future<String> _getClipboardText() async {
     ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
@@ -147,7 +153,8 @@ class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
                           filled: true,
                           fillColor:
                               Theme.of(context).appBarTheme.foregroundColor,
-                          hintText: 'Title',
+                          hintText: _localization
+                              .translation.placeholder['add_link_title'],
                           hintStyle: const TextStyle(
                             color: Color(0xFF888888),
                           ),
@@ -182,7 +189,8 @@ class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
                           filled: true,
                           fillColor:
                               Theme.of(context).appBarTheme.foregroundColor,
-                          hintText: 'URL',
+                          hintText: _localization
+                              .translation.placeholder['add_link_url'],
                           hintStyle: const TextStyle(
                             color: Color(0xFF888888),
                           ),
@@ -199,11 +207,11 @@ class _AddLinkModalWidgetState extends State<AddLinkModalWidget> {
             ),
             FloatingActionButton(
               heroTag: 'Add New Link Modal FAB',
+              onPressed: _addNewLinkIntoDatabase,
               child: const Icon(
                 Icons.add,
                 color: Color(0xFFFFFFFF),
               ),
-              onPressed: _addNewLinkIntoDatabase,
             ),
           ],
         ),

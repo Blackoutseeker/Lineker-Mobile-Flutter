@@ -5,7 +5,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../controllers/services/localization.dart';
 import '../../controllers/stores/user_store.dart';
+import '../../controllers/stores/localization_store.dart';
 
 import '../../models/utils/constants.dart';
 import '../../models/database/history_model.dart';
@@ -25,6 +27,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final DatabaseReference _database = FirebaseDatabase.instance.reference();
   late StreamSubscription<Event> _dataStreamSubscription;
   final UserStore _userStore = GetIt.I.get<UserStore>();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   final BannerAd _bannerAd = BannerAd(
     adUnitId: Constants.instance.bannerAdUnitId,
@@ -90,15 +94,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context: context,
       barrierDismissible: true,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Are you sure?'),
+        title: Text(_localization.translation.dialog['title']),
         content: contentText != null ? Text(contentText) : null,
         actions: <TextButton>[
           TextButton(
-            child: const Text('Yes'),
             onPressed: confirmAction,
+            child: Text(_localization.translation.dialog['buttons']['yes']),
           ),
           TextButton(
-            child: const Text('No'),
+            child: Text(_localization.translation.dialog['buttons']['no']),
             onPressed: () => Navigator.of(dialogContext).pop(),
           ),
         ],
@@ -180,7 +184,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          title: const Text('History'),
+          title: Text(_localization.translation.titles['history']),
           leading: IconButton(
             onPressed: () => _navigateToMainScreen(context),
             icon: const Icon(
@@ -194,7 +198,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ? () async => await _showDeleteAlertDialog(
                         context,
                         _deleteAllHistory,
-                        'This will delete the entire timeline from your history!',
+                        _localization.translation.dialog['history_content'],
                       )
                   : null,
               icon: const Icon(
@@ -207,9 +211,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
         body: Column(
           children: [
             SizedBox(
-              child: AdWidget(ad: _bannerAd),
               width: _bannerAd.size.width.toDouble(),
               height: _bannerAd.size.height.toDouble() + 5,
+              child: AdWidget(ad: _bannerAd),
             ),
             Expanded(
               child: _historyItems.isNotEmpty
@@ -237,7 +241,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                     )
-                  : const VoidHistory(),
+                  : VoidHistory(),
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
@@ -9,11 +10,23 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 
-class QrModalWidget extends StatelessWidget {
-  QrModalWidget({Key? key, required this.url}) : super(key: key);
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
+
+class QrModalWidget extends StatefulWidget {
+  const QrModalWidget({Key? key, required this.url}) : super(key: key);
 
   final String url;
+
+  @override
+  State<QrModalWidget> createState() => _QrModalWidgetState();
+}
+
+class _QrModalWidgetState extends State<QrModalWidget> {
   final ScreenshotController _screenshotController = ScreenshotController();
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   void _notifyUserWithSnackBar(
     BuildContext context,
@@ -48,7 +61,7 @@ class QrModalWidget extends StatelessWidget {
     return null;
   }
 
-  Future<void> _shareQrCode(BuildContext context) async {
+  Future<void> _shareQrCode() async {
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     final File? qrCodeImage = await _captureQrCodeImageToShare();
 
@@ -66,7 +79,7 @@ class QrModalWidget extends StatelessWidget {
     return qrCodeImage;
   }
 
-  Future<void> _saveQrCode(BuildContext context) async {
+  Future<void> _saveQrCode() async {
     final Uint8List? qrCodeImage = await _captureQrCodeImageToSave();
     final bool haveStoragePermission =
         await Permission.storage.request().isGranted;
@@ -78,17 +91,21 @@ class QrModalWidget extends StatelessWidget {
         quality: 100,
         name: captureTimestamp,
       );
-      _notifyUserWithSnackBar(
-        context,
-        'QR code saved in gallery!',
-        2500,
-      );
+      if (mounted) {
+        _notifyUserWithSnackBar(
+          context,
+          _localization.translation.snackbar['qr_saved'],
+          2500,
+        );
+      }
     } else {
-      _notifyUserWithSnackBar(
-        context,
-        'Unable to save QR code! Have you given permission for storage?',
-        3500,
-      );
+      if (mounted) {
+        _notifyUserWithSnackBar(
+          context,
+          _localization.translation.snackbar['storage_permission'],
+          3500,
+        );
+      }
     }
   }
 
@@ -120,7 +137,7 @@ class QrModalWidget extends StatelessWidget {
                   Icons.share,
                   color: Color(0xFF9E9E9E),
                 ),
-                onPressed: () => _shareQrCode(context),
+                onPressed: () => _shareQrCode(),
               ),
             ],
           ),
@@ -137,7 +154,7 @@ class QrModalWidget extends StatelessWidget {
             child: Screenshot(
               controller: _screenshotController,
               child: QrImage(
-                data: url,
+                data: widget.url,
                 size: 210,
                 backgroundColor: const Color(0xFFFFFFFF),
                 padding: const EdgeInsets.all(10),
@@ -151,11 +168,11 @@ class QrModalWidget extends StatelessWidget {
               width: double.infinity,
               height: 40,
               child: ElevatedButton(
-                child: const Text(
-                  'SAVE TO GALLERY',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                child: Text(
+                  _localization.translation.button['save_to_gallery'],
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                onPressed: () => _saveQrCode(context),
+                onPressed: () => _saveQrCode(),
               ),
             ),
           ),

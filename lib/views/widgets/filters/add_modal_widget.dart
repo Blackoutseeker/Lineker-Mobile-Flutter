@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:firebase_database/firebase_database.dart';
+
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 import '../../../models/utils/database_codification.dart';
 
@@ -19,6 +23,9 @@ class AddModalWidget extends StatefulWidget {
 
 class _AddModalWidgetState extends State<AddModalWidget> {
   final TextEditingController _filterInputController = TextEditingController();
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   Future<void> _addNewFilter() async {
     final String? userUID = widget.userUID;
@@ -82,7 +89,8 @@ class _AddModalWidgetState extends State<AddModalWidget> {
                       ),
                       filled: true,
                       fillColor: Theme.of(context).appBarTheme.foregroundColor,
-                      hintText: 'Filter',
+                      hintText:
+                          _localization.translation.placeholder['add_filter'],
                       hintStyle: const TextStyle(
                         color: Color(0xFF888888),
                       ),
@@ -93,11 +101,11 @@ class _AddModalWidgetState extends State<AddModalWidget> {
             ),
             FloatingActionButton(
               heroTag: 'Add New Filter Modal FAB',
+              onPressed: _addNewFilter,
               child: const Icon(
                 Icons.add,
                 color: Color(0xFFFFFFFF),
               ),
-              onPressed: _addNewFilter,
             ),
           ],
         ),

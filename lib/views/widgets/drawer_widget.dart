@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get_it/get_it.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../controllers/stores/user_store.dart';
 import '../../controllers/stores/theme_store.dart';
+import '../../controllers/stores/localization_store.dart';
+import '../../controllers/services/localization.dart';
 import '../../controllers/services/authentication.dart';
 
 import '../../models/routes/app_routes.dart';
 
-class DrawerWidget extends StatelessWidget {
-  DrawerWidget({Key? key}) : super(key: key);
+class DrawerWidget extends StatefulWidget {
+  const DrawerWidget({Key? key}) : super(key: key);
 
+  @override
+  State<DrawerWidget> createState() => _DrawerWidgetState();
+}
+
+class _DrawerWidgetState extends State<DrawerWidget> {
   final UserStore _userStore = GetIt.I.get<UserStore>();
+
   final ThemeStore _themeStore = GetIt.I.get<ThemeStore>();
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
+
   final Authentication _authentication = Authentication.instance;
 
   void _navigateToHistoryScreen(BuildContext context) {
@@ -27,9 +39,9 @@ class DrawerWidget extends StatelessWidget {
         'assets/images/Lineker Logo.png',
         height: 50,
       ),
-      applicationLegalese: '© 2021 Felip\'s Tudio',
+      applicationLegalese: '© 2022 Felip\'s Tudio',
       applicationName: 'Lineker',
-      applicationVersion: 'v2.3.3',
+      applicationVersion: 'v2.4.3',
     );
   }
 
@@ -78,9 +90,9 @@ class DrawerWidget extends StatelessWidget {
                 onChanged: _themeStore.changeTheme,
               ),
             ),
-            title: const Text(
-              'Switch theme',
-              style: TextStyle(
+            title: Text(
+              _localization.translation.switchTheme,
+              style: const TextStyle(
                 color: Color(0xFFFFFFFF),
                 fontSize: 18,
               ),
@@ -97,24 +109,25 @@ class DrawerWidget extends StatelessWidget {
               color: Color(0xFFFFFFFF),
               size: 28,
             ),
-            title: const Text(
-              'History',
-              style: TextStyle(
+            title: Text(
+              _localization.translation.drawer['history'],
+              style: const TextStyle(
                 color: Color(0xFFFFFFFF),
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            onTap: () async => await launch('https://lineker.vercel.app'),
+            onTap: () async =>
+                await launchUrlString('https://lineker.vercel.app'),
             leading: const Icon(
               Icons.web,
               color: Color(0xFFFFFFFF),
               size: 28,
             ),
-            title: const Text(
-              'Web version',
-              style: TextStyle(
+            title: Text(
+              _localization.translation.drawer['web_version'],
+              style: const TextStyle(
                 color: Color(0xFFFFFFFF),
                 fontSize: 18,
               ),
@@ -127,24 +140,24 @@ class DrawerWidget extends StatelessWidget {
               color: Color(0xFFFFFFFF),
               size: 28,
             ),
-            title: const Text(
-              'About the app',
-              style: TextStyle(
+            title: Text(
+              _localization.translation.drawer['about'],
+              style: const TextStyle(
                 color: Color(0xFFFFFFFF),
                 fontSize: 18,
               ),
             ),
           ),
           ListTile(
-            onTap: () async => await _authentication.signOut(context),
+            onTap: () async => await _authentication.signOut(context, mounted),
             leading: const Icon(
               Icons.logout,
               color: Color(0xFFFFFFFF),
               size: 28,
             ),
-            title: const Text(
-              'Sign out',
-              style: TextStyle(
+            title: Text(
+              _localization.translation.drawer['sign_out'],
+              style: const TextStyle(
                 color: Color(0xFFFFFFFF),
                 fontSize: 18,
               ),

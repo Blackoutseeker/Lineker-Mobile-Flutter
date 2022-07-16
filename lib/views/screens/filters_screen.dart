@@ -5,8 +5,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:get_it/get_it.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../../controllers/services/localization.dart';
 import '../../controllers/stores/filter_store.dart';
 import '../../controllers/stores/user_store.dart';
+import '../../controllers/stores/localization_store.dart';
 
 import '../../models/utils/constants.dart';
 import '../../models/database/filter_model.dart';
@@ -19,7 +21,7 @@ class FiltersScreen extends StatefulWidget {
   const FiltersScreen({Key? key}) : super(key: key);
 
   @override
-  _FiltersScreenState createState() => _FiltersScreenState();
+  State<FiltersScreen> createState() => _FiltersScreenState();
 }
 
 class _FiltersScreenState extends State<FiltersScreen> {
@@ -27,6 +29,8 @@ class _FiltersScreenState extends State<FiltersScreen> {
   late StreamSubscription<Event> _dataStreamSubscription;
   final UserStore _userStore = GetIt.I.get<UserStore>();
   final FilterStore _filterStore = GetIt.I.get<FilterStore>();
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   final BannerAd _bannerAd = BannerAd(
     adUnitId: Constants.instance.bannerAdUnitId,
@@ -150,7 +154,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
           appBar: AppBar(
             centerTitle: true,
             backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-            title: const Text('Filters'),
+            title: Text(_localization.translation.titles['filters']),
             leading: IconButton(
               icon: const Icon(
                 Icons.arrow_back,
@@ -162,9 +166,9 @@ class _FiltersScreenState extends State<FiltersScreen> {
           body: Column(
             children: [
               SizedBox(
-                child: AdWidget(ad: _bannerAd),
                 width: _bannerAd.size.width.toDouble(),
                 height: _bannerAd.size.height.toDouble() + 10,
+                child: AdWidget(ad: _bannerAd),
               ),
               Expanded(
                 child: StreamBuilder(
@@ -203,19 +207,28 @@ class _FiltersScreenState extends State<FiltersScreen> {
                                 barrierDismissible: true,
                                 context: context,
                                 builder: (dialogContext) => AlertDialog(
-                                  title: const Text('Are you sure?'),
-                                  content: const Text(
-                                    'All your links within this filter will be deleted!',
+                                  title: Text(
+                                    _localization.translation.dialog['title'],
+                                  ),
+                                  content: Text(
+                                    _localization
+                                        .translation.dialog['filter_content'],
                                   ),
                                   actions: <TextButton>[
                                     TextButton(
-                                      child: const Text('Yes'),
+                                      child: Text(
+                                        _localization.translation
+                                            .dialog['buttons']['yes'],
+                                      ),
                                       onPressed: () => _deleteFilter(
                                           _filters[index].filter,
                                           dialogContext),
                                     ),
                                     TextButton(
-                                      child: const Text('No'),
+                                      child: Text(
+                                        _localization.translation
+                                            .dialog['buttons']['yes'],
+                                      ),
                                       onPressed: () =>
                                           Navigator.of(dialogContext).pop(),
                                     ),

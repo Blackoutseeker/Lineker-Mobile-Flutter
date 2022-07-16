@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 class VoidHistory extends StatelessWidget {
-  const VoidHistory({Key? key}) : super(key: key);
+  VoidHistory({Key? key}) : super(key: key);
+
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       heightFactor: 10,
       child: Text(
-        'No recent activity to show here!',
+        _localization.translation.voidHistory,
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: const TextStyle(
           color: Color(0xFFFFFFFF),
           fontSize: 20,
         ),

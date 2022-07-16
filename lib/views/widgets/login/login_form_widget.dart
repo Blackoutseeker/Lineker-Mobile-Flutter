@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:get_it/get_it.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../controllers/services/authentication.dart';
+import '../../../controllers/services/localization.dart';
+import '../../../controllers/stores/localization_store.dart';
 
 class LoginFormWidget extends StatefulWidget {
   const LoginFormWidget({Key? key}) : super(key: key);
 
   @override
-  _LoginFormWidgetState createState() => _LoginFormWidgetState();
+  State<LoginFormWidget> createState() => _LoginFormWidgetState();
 }
 
 class _LoginFormWidgetState extends State<LoginFormWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final Authentication _authentication = Authentication.instance;
+  final Localization _localization =
+      GetIt.I.get<LocalizationStore>().localization;
+
   bool _hidePassword = true;
   bool _createAccount = false;
   bool _hasAcceptedThePrivacyPolicy = false;
@@ -59,9 +65,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   void _notifyUserAboutPolicyPrivacyAndTermsOfUse() {
     showDialog(
       context: context,
-      builder: (_) => const AlertDialog(
+      builder: (_) => AlertDialog(
         content: Text(
-          'You must accept the Privacy Policy and Terms of Use to create an account!',
+          _localization.translation.dialog['accept_privacy_policy'],
           textAlign: TextAlign.justify,
         ),
       ),
@@ -83,7 +89,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
   }
 
   Future<void> _openUrl(String url) async {
-    await launch(url);
+    await launchUrlString(url);
   }
 
   void _handleButtonPress() {
@@ -113,7 +119,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 color: Color(0xFFFFFFFF),
               ),
               decoration: InputDecoration(
-                hintText: 'Email',
+                hintText: _localization.translation.placeholder['email'],
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 2,
                   horizontal: 5,
@@ -143,7 +149,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   color: Color(0xFFFFFFFF),
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Password',
+                  hintText: _localization.translation.placeholder['password'],
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 2,
                   ),
@@ -170,9 +176,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 ),
               ),
             if (_createAccount)
-              const Text(
-                'The password must have 6 or more characters',
-                style: TextStyle(
+              Text(
+                _localization.translation.passwordRule,
+                style: const TextStyle(
                   color: Color(0xFFFFFFFF),
                   fontSize: 15,
                 ),
@@ -185,9 +191,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   highlightColor: Colors.transparent,
                   onTap: () => _authentication.resetPassword(
                       _emailController.text, context),
-                  child: const Text(
-                    'Forgot your password?',
-                    style: TextStyle(
+                  child: Text(
+                    _localization.translation.button['forgot_password'],
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Color(0xFFFFFFFF),
                     ),
@@ -206,7 +212,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   color: Color(0xFFFFFFFF),
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Password',
+                  hintText: _localization.translation.placeholder['password'],
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 2,
                   ),
@@ -249,9 +255,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                             onChanged: (_) =>
                                 _switcHasAcceptedThePrivacyPolicyState(),
                           ),
-                          const Text(
-                            'I have read and agree to the ',
-                            style: TextStyle(
+                          Text(
+                            _localization
+                                .translation.button['accept_policy_privacy1'],
+                            style: const TextStyle(
                               color: Color(0xFFFFFFFF),
                               fontSize: 14,
                             ),
@@ -259,9 +266,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           GestureDetector(
                             onTap: () => _openUrl(
                                 'https://drive.google.com/file/d/1q7GrBEzORsehR6QjHI02b7OSki1llDCP/view'),
-                            child: const Text(
-                              'Policy Privacy',
-                              style: TextStyle(
+                            child: Text(
+                              _localization
+                                  .translation.button['accept_policy_privacy2'],
+                              style: const TextStyle(
                                 color: Color(0xFFFFFFFF),
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -292,9 +300,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                             onChanged: (_) =>
                                 _switcHasAcceptedTheTermsOfUseState(),
                           ),
-                          const Text(
-                            'I have read and agree to the ',
-                            style: TextStyle(
+                          Text(
+                            _localization
+                                .translation.button['accept_terms_of_use1'],
+                            style: const TextStyle(
                               color: Color(0xFFFFFFFF),
                               fontSize: 14,
                             ),
@@ -302,9 +311,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           GestureDetector(
                             onTap: () => _openUrl(
                                 'https://drive.google.com/file/d/1I2HiAlGYECNKSL7nvRh6Oui9fvk6kIpS/view'),
-                            child: const Text(
-                              'Terms of Use',
-                              style: TextStyle(
+                            child: Text(
+                              _localization
+                                  .translation.button['accept_terms_of_use2'],
+                              style: const TextStyle(
                                 color: Color(0xFFFFFFFF),
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -327,7 +337,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 child: ElevatedButton(
                   onPressed: _handleButtonPress,
                   child: Text(
-                    !_createAccount ? 'Sign in' : 'Sign up',
+                    !_createAccount
+                        ? _localization.translation.button['sign_in']
+                        : _localization.translation.button['sign_up'],
                     style: const TextStyle(
                       color: Color(0xFFFFFFFF),
                       fontSize: 24,
@@ -344,14 +356,17 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: ElevatedButton.icon(
-                  onPressed: () => _authentication.signInWithGoogle(context),
+                  onPressed: () => _authentication.signInWithGoogle(
+                    context,
+                    mounted,
+                  ),
                   icon: const FaIcon(
                     FontAwesomeIcons.google,
                     color: Color(0xFF333333),
                   ),
-                  label: const Text(
-                    'Sign in with Google',
-                    style: TextStyle(
+                  label: Text(
+                    _localization.translation.button['sign_in_with_google'],
+                    style: const TextStyle(
                       color: Color(0xFF333333),
                       fontSize: 24,
                       fontWeight: FontWeight.normal,
@@ -371,8 +386,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
               onTap: _switchCreateAccountState,
               child: Text(
                 !_createAccount
-                    ? 'Don\'t have an account? Do it now!'
-                    : 'Have an account? So, sign in!',
+                    ? _localization.translation.button['dont_have_account']
+                    : _localization.translation.button['have_account'],
                 style: const TextStyle(
                   fontSize: 18,
                   color: Color(0xFFFFFFFF),
