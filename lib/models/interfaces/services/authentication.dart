@@ -7,7 +7,7 @@ abstract class IAuthentication {
     required BuildContext context,
   });
 
-  Future<void> signInWithGoogle(BuildContext context);
+  Future<void> signInWithGoogle(BuildContext context, bool mounted);
 
   Future<void> signUp({
     required String email,
@@ -15,6 +15,6 @@ abstract class IAuthentication {
     required BuildContext context,
   });
 
-  Future<void> signOut(BuildContext context);
+  Future<void> signOut(BuildContext context, bool mounted);
   Future<void> resetPassword(String email, BuildContext context);
 }
