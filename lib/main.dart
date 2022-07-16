@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
@@ -10,6 +13,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import './controllers/stores/theme_store.dart';
 import './controllers/stores/user_store.dart';
 import './controllers/stores/filter_store.dart';
+import './controllers/stores/localization_store.dart';
 
 import './models/shared_preferences/storaged_values.dart';
 import './models/themes/light_theme.dart';
@@ -32,6 +36,7 @@ void main() async {
   getIt.registerLazySingleton<UserStore>(() => UserStore());
   getIt.registerLazySingleton<ThemeStore>(() => ThemeStore());
   getIt.registerLazySingleton<FilterStore>(() => FilterStore());
+  getIt.registerLazySingleton<LocalizationStore>(() => LocalizationStore());
 
   final SharedPreferences preferences = await SharedPreferences.getInstance();
   final String? isLogged = preferences.getString(StoragedValues.userUID);
@@ -44,16 +49,28 @@ class App extends StatelessWidget {
 
   final String? isLogged;
   final ThemeStore theme = GetIt.I.get<ThemeStore>();
+  final LocalizationStore localizationStore = GetIt.I.get<LocalizationStore>();
 
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    localizationStore.localization.currentLocale = Platform.localeName;
+
     return Observer(
       builder: (_) => MaterialApp(
         title: 'Lineker',
         themeMode: theme.isDark ? ThemeMode.dark : ThemeMode.light,
         theme: LightTheme().lightThemeData,
         darkTheme: DarkTheme().darkThemeData,
+        localizationsDelegates: const [
+          GlobalWidgetsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', 'US'),
+          Locale('pt', 'BR'),
+        ],
         home: isLogged == null ? const LoginScreen() : const MainScreen(),
         routes: {
           AppRoutes.login: (_) => const LoginScreen(),
