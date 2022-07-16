@@ -113,7 +113,7 @@ class Authentication implements IAuthentication {
   }
 
   @override
-  Future<void> signInWithGoogle(BuildContext context) async {
+  Future<void> signInWithGoogle(BuildContext context, bool mounted) async {
     final googleAccount = await _googleSignIn.signIn();
     if (googleAccount == null) return;
 
@@ -133,9 +133,13 @@ class Authentication implements IAuthentication {
       final bool userAlreadyExists =
           await _checkIfUserAlreadyIsStoredInDatabase(user.uid);
       if (userAlreadyExists) {
-        _saveUserSession(user.email!, context);
+        if (mounted) {
+          _saveUserSession(user.email!, context);
+        }
       } else {
-        _createUserInDatabase(user.uid, user.email, context);
+        if (mounted) {
+          _createUserInDatabase(user.uid, user.email, context);
+        }
       }
     }).catchError((error) async {
       await _presentDialog(
@@ -170,7 +174,7 @@ class Authentication implements IAuthentication {
   }
 
   @override
-  Future<void> signOut(BuildContext context) async {
+  Future<void> signOut(BuildContext context, bool mounted) async {
     try {
       await _googleSignIn.disconnect();
     } catch (_) {}
@@ -182,11 +186,13 @@ class Authentication implements IAuthentication {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.clear().then((_) async {
       await themeStore.changeTheme(false);
-      await Navigator.of(context)
-          .pushReplacementNamed(AppRoutes.login)
-          .then((_) {
-        userStore.signOutUser();
-      });
+      if (mounted) {
+        await Navigator.of(context)
+            .pushReplacementNamed(AppRoutes.login)
+            .then((_) {
+          userStore.signOutUser();
+        });
+      }
     });
   }
 
