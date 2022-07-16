@@ -4,9 +4,9 @@ import '../../models/shared_preferences/storaged_values.dart';
 import '../../models/interfaces/stores/theme_store.dart';
 part 'theme_store.g.dart';
 
-class ThemeStore = _ThemeStore with _$ThemeStore;
+class ThemeStore = ThemeStoreModel with _$ThemeStore;
 
-abstract class _ThemeStore with Store implements IThemeStore {
+abstract class ThemeStoreModel with Store implements IThemeStore {
   @observable
   @override
   bool isDark = false;

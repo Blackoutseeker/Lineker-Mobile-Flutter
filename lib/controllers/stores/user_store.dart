@@ -3,9 +3,9 @@ import '../../models/interfaces/stores/user_store.dart';
 import '../../models/database/user_model.dart';
 part 'user_store.g.dart';
 
-class UserStore = _UserStore with _$UserStore;
+class UserStore = UserStoreModel with _$UserStore;
 
-abstract class _UserStore with Store implements IUserStore {
+abstract class UserStoreModel with Store implements IUserStore {
   @observable
   @override
   UserModel user = UserModel(email: null, id: null);

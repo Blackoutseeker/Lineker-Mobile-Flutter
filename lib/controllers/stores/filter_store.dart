@@ -4,9 +4,9 @@ import '../../models/interfaces/stores/filter_store.dart';
 import '../../models/shared_preferences/storaged_values.dart';
 part 'filter_store.g.dart';
 
-class FilterStore = _FilterStore with _$FilterStore;
+class FilterStore = FilterStoreModel with _$FilterStore;
 
-abstract class _FilterStore with Store implements IFilterStore {
+abstract class FilterStoreModel with Store implements IFilterStore {
   @observable
   @override
   String filter = 'Default';
