@@ -41,7 +41,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
       ),
       applicationLegalese: '© 2022 Felip\'s Tudio',
       applicationName: 'Lineker',
-      applicationVersion: 'v2.4.3',
+      applicationVersion: 'v2.5.4',
     );
   }
 
