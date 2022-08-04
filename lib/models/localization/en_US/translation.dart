@@ -46,9 +46,9 @@ class TranslationEnUs implements Translation {
     'email': 'Email',
     'password': 'Password',
     'search': 'Title, URL, date...',
-    'add_link_title': 'Título',
+    'add_link_title': 'Title',
     'add_link_url': 'URL',
-    'add_filter': 'Filtro',
+    'add_filter': 'Filter',
   };
 
   @override
