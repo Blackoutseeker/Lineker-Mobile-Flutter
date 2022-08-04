@@ -227,7 +227,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
                                     TextButton(
                                       child: Text(
                                         _localization.translation
-                                            .dialog['buttons']['yes'],
+                                            .dialog['buttons']['no'],
                                       ),
                                       onPressed: () =>
                                           Navigator.of(dialogContext).pop(),
