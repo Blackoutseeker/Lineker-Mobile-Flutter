@@ -22,6 +22,7 @@ dependencies:
   firebase_auth: ^3.4.2
   google_sign_in: ^5.4.0
   firebase_database: ^8.2.0
+  firebase_app_check: ^0.0.6+18
   url_launcher: ^6.1.5
   qr_flutter: ^4.0.0
   intl: ^0.17.0
